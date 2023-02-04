@@ -82,8 +82,8 @@ class patch_embedding(Layer):
     def __init__(self, num_patch, embed_dim):
         super(patch_embedding, self).__init__()
         self.num_patch = num_patch
-        self.proj = Dense(embed_dim)
-        self.pos_embed = Embedding(input_dim=num_patch, output_dim=embed_dim)
+        self.proj = Dense(embed_dim, trainable=False)
+        self.pos_embed = Embedding(input_dim=num_patch, output_dim=embed_dim, trainable=False)
 
     def call(self, patch):
         pos = tf.range(start=0, limit=self.num_patch, delta=1)
@@ -151,9 +151,9 @@ class patch_expanding(tf.keras.layers.Layer):
         self.return_vector = return_vector
         
         # Linear transformations that doubles the channels 
-        self.linear_trans1 = Conv2D(upsample_rate*embed_dim, kernel_size=1, use_bias=False, name='{}_linear_trans1'.format(name))
+        self.linear_trans1 = Conv2D(upsample_rate*embed_dim, kernel_size=1, use_bias=False, name='{}_linear_trans1'.format(name), trainable=False)
         # 
-        self.linear_trans2 = Conv2D(upsample_rate*embed_dim, kernel_size=1, use_bias=False, name='{}_linear_trans1'.format(name))
+        self.linear_trans2 = Conv2D(upsample_rate*embed_dim, kernel_size=1, use_bias=False, name='{}_linear_trans1'.format(name), trainable=False)
         self.prefix = name
         
     def call(self, x):
