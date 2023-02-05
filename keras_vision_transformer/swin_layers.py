@@ -251,6 +251,7 @@ class SwinTransformerBlock(tf.keras.layers.Layer):
 
         # Window-based multi-headed self-attention
         attn_windows = self.attn(x_windows, mask=self.attn_mask)
+        print(attn_windows.shape)
 
         # Merge windows
         attn_windows = tf.reshape(attn_windows, shape=(-1, self.window_size, self.window_size, C))
