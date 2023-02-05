@@ -35,8 +35,6 @@ class patch_extract(Layer):
         super(patch_extract, self).__init__()
         self.patch_size_x = patch_size[0]
         self.patch_size_y = patch_size[0]
-        print(f'patch_size_x {patch_size_x}')
-        print(f'patch_size_x {patch_size_y}')
         
     def call(self, images):
         
@@ -46,12 +44,8 @@ class patch_extract(Layer):
                                   strides=(1, self.patch_size_x, self.patch_size_y, 1),
                                   rates=(1, 1, 1, 1), padding='VALID',)
         # patches.shape = (num_sample, patch_num, patch_num, patch_size*channel)
-        print(f'patches.shape {patches.shape}')
         
         patch_dim = patches.shape[-1]
-        print('######################################################')
-        print(f'patch_dim {patch_dim}')
-        print('######################################################')
         patch_num = patches.shape[1]
         patches = tf.reshape(patches, (batch_size, patch_num*patch_num, patch_dim))
         # patches.shape = (num_sample, patch_num*patch_num, patch_size*channel)
