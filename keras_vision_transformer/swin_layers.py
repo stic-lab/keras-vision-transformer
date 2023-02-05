@@ -185,8 +185,7 @@ class SwinTransformerBlock(tf.keras.layers.Layer):
         self.drop_path = drop_path(drop_path_prob)
         self.norm2 = LayerNormalization(epsilon=1e-5, name='{}_norm2'.format(self.prefix))
 
-        initializer = tf.keras.initializers.RandomNormal(mean=0., stddev=1.)
-        self.mlp = Mlp([num_mlp, dim], drop=mlp_drop, name=self.prefix, kernel_initializer=initializer)
+        self.mlp = Mlp([num_mlp, dim], drop=mlp_drop, name=self.prefix)
         
         # Assertions
         assert 0 <= self.shift_size, 'shift_size >= 0 is required'
