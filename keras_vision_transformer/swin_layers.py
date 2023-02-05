@@ -48,7 +48,7 @@ class Mlp(tf.keras.layers.Layer):
         # MLP layers
         initializer = tf.keras.initializers.RandomNormal(mean=0., stddev=1.)
         self.fc1 = Dense(filter_num[0], name='{}_mlp_0'.format(name), kernel_initializer=initializer)
-        self.fc2 = Dense(filter_num[1], name='{}_mlp_1'.format(name))
+        self.fc2 = Dense(filter_num[1], name='{}_mlp_1'.format(name), kernel_initializer=initializer)
         
         # Dropout layer
         self.drop = Dropout(drop)
