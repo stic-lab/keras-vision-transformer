@@ -46,7 +46,8 @@ class Mlp(tf.keras.layers.Layer):
         super().__init__()
         
         # MLP layers
-        self.fc1 = Dense(filter_num[0], name='{}_mlp_0'.format(name))
+        initializer = tf.keras.initializers.RandomNormal(mean=0., stddev=1.)
+        self.fc1 = Dense(filter_num[0], name='{}_mlp_0'.format(name), kernel_initializer=initializer)
         self.fc2 = Dense(filter_num[1], name='{}_mlp_1'.format(name))
         
         # Dropout layer
@@ -80,9 +81,10 @@ class WindowAttention(tf.keras.layers.Layer):
         self.prefix = name
         
         # Layers
-        self.qkv = Dense(dim * 3, use_bias=qkv_bias, name='{}_attn_qkv'.format(self.prefix))
+        initializer = tf.keras.initializers.RandomNormal(mean=0., stddev=1.)
+        self.qkv = Dense(dim * 3, use_bias=qkv_bias, name='{}_attn_qkv'.format(self.prefix), kernel_initializer=initializer)
         self.attn_drop = Dropout(attn_drop)
-        self.proj = Dense(dim, name='{}_attn_proj'.format(self.prefix))
+        self.proj = Dense(dim, name='{}_attn_proj'.format(self.prefix), kernel_initializer=initializer)
         self.proj_drop = Dropout(proj_drop)
 
     def build(self, input_shape):
@@ -182,7 +184,9 @@ class SwinTransformerBlock(tf.keras.layers.Layer):
                                     qkv_bias=qkv_bias, qk_scale=qk_scale, attn_drop=attn_drop, proj_drop=proj_drop, name=self.prefix)
         self.drop_path = drop_path(drop_path_prob)
         self.norm2 = LayerNormalization(epsilon=1e-5, name='{}_norm2'.format(self.prefix))
-        self.mlp = Mlp([num_mlp, dim], drop=mlp_drop, name=self.prefix)
+
+        initializer = tf.keras.initializers.RandomNormal(mean=0., stddev=1.)
+        self.mlp = Mlp([num_mlp, dim], drop=mlp_drop, name=self.prefix, kernel_initializer=initializer)
         
         # Assertions
         assert 0 <= self.shift_size, 'shift_size >= 0 is required'
