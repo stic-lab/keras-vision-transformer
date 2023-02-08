@@ -225,16 +225,6 @@ class SwinTransformerBlock(tf.keras.layers.Layer):
             self.attn_mask = None
 
         self.built = True
-    
-
-    def get_enhanced_image(self, data, output):
-        x = data
-                # (8192, 16, 128)
-        for i in range(0, 4 * 128, 128):
-            r = output[:, :, i: i + 128]
-            x = x + r * (tf.square(x) - x)
-            
-        return x
 
     def call(self, x):
         H, W = self.num_patch
@@ -257,53 +247,18 @@ class SwinTransformerBlock(tf.keras.layers.Layer):
             shifted_x = tf.roll(x, shift=[-self.shift_size, -self.shift_size], axis=[1, 2])
         else:
             shifted_x = x
-        ############# FIRST WINDOWS ATTENTION ###########################
+
         # Window partition 
         x_windows = window_partition(shifted_x, self.window_size)
         x_windows = tf.reshape(x_windows, shape=(-1, self.window_size * self.window_size, C))
 
         # Window-based multi-headed self-attention
-        attn_windows1 = self.attn(x_windows, mask=self.attn_mask)
-
-        ############# SECOND WINDOWS ATTENTION ###########################
-        # Merge windows
-        attn_windows = tf.reshape(attn_windows1, shape=(-1, self.window_size, self.window_size, C))
-        shifted_x = window_reverse(attn_windows, self.window_size, H, W, C)
-        shifted_x = tf.roll(x, shift=[-self.shift_size, -self.shift_size], axis=[1, 2])
-        # Window partition 
-        x_windows = window_partition(shifted_x, self.window_size)
-        x_windows = tf.reshape(x_windows, shape=(-1, self.window_size * self.window_size, C))
-
-        # Window-based multi-headed self-attention
-        attn_windows2 = self.attn(x_windows, mask=self.attn_mask)
-        attn_windows_concat = tf.keras.layers.concatenate([attn_windows1, attn_windows2], axis=-1, name='concat1')
-        ############# THIRD WINDOWS ATTENTION ###########################
-        # Merge windows
-        attn_windows = tf.reshape(attn_windows2, shape=(-1, self.window_size, self.window_size, C))
-        shifted_x = window_reverse(attn_windows, self.window_size, H, W, C)
-        shifted_x = tf.roll(x, shift=[-self.shift_size, -self.shift_size], axis=[1, 2])
-        # Window partition 
-        x_windows = window_partition(shifted_x, self.window_size)
-        x_windows = tf.reshape(x_windows, shape=(-1, self.window_size * self.window_size, C))
-
-        # Window-based multi-headed self-attention
-        attn_windows3 = self.attn(x_windows, mask=self.attn_mask)
-        attn_windows_concat = tf.keras.layers.concatenate([attn_windows3, attn_windows_concat], axis=-1, name='concat2')
-        ############# THROURTH WINDOWS ATTENTION ###########################
-        # Merge windows
-        attn_windows = tf.reshape(attn_windows3, shape=(-1, self.window_size, self.window_size, C))
-        shifted_x = window_reverse(attn_windows, self.window_size, H, W, C)
-        shifted_x = tf.roll(x, shift=[-self.shift_size, -self.shift_size], axis=[1, 2])
-        # Window partition 
-        x_windows = window_partition(shifted_x, self.window_size)
-        x_windows = tf.reshape(x_windows, shape=(-1, self.window_size * self.window_size, C))
-
-        # Window-based multi-headed self-attention
-        attn_windows4 = self.attn(x_windows, mask=self.attn_mask)
-        attn_windows_concat = tf.keras.layers.concatenate([attn_windows4, attn_windows_concat], axis=-1, name='concat2')
-        ############# END WINDOWS PARTITION ###########################
-
-        attn_windows = self.get_enhanced_image(x_windows, attn_windows_concat)
+        # Epoch 1/3
+        # (8192, 16, 128)
+        # (8192, 16, 128)
+        # (8192, 16, 128)
+        # (8192, 16, 128)
+        attn_windows = self.attn(x_windows, mask=self.attn_mask)
         # print(attn_windows.shape)
         # Epoch 1/3
         # (8192, 16, 128)
