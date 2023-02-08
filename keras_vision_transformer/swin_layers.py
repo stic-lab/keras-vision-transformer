@@ -267,8 +267,8 @@ class SwinTransformerBlock(tf.keras.layers.Layer):
 
         ############# SECOND WINDOWS ATTENTION ###########################
         # Merge windows
-        attn_windows1 = tf.reshape(attn_windows1, shape=(-1, self.window_size, self.window_size, C))
-        shifted_x = window_reverse(attn_windows1, self.window_size, H, W, C)
+        attn_windows = tf.reshape(attn_windows1, shape=(-1, self.window_size, self.window_size, C))
+        shifted_x = window_reverse(attn_windows, self.window_size, H, W, C)
         shifted_x = tf.roll(x, shift=[-self.shift_size, -self.shift_size], axis=[1, 2])
         # Window partition 
         x_windows = window_partition(shifted_x, self.window_size)
