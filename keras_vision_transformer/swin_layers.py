@@ -231,7 +231,7 @@ class SwinTransformerBlock(tf.keras.layers.Layer):
         x = data
                 # (8192, 16, 128)
         for i in range(0, 2 * 128, 128):
-            r = output[:, :, i: i + 3]
+            r = output[:, :, i: i + 128]
             x = x + r * (tf.square(x) - x)
             
         return x
