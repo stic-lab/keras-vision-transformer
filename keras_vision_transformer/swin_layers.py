@@ -229,8 +229,9 @@ class SwinTransformerBlock(tf.keras.layers.Layer):
 
     def get_enhanced_image(self, data, output):
         x = data
-        for i in range(0, 3 * 24, 3):
-            r = output[:, :, :, i: i + 3]
+                # (8192, 16, 128)
+        for i in range(0, 2 * 128, 128):
+            r = output[:, :, i: i + 3]
             x = x + r * (tf.square(x) - x)
             
         return x
@@ -262,22 +263,23 @@ class SwinTransformerBlock(tf.keras.layers.Layer):
         x_windows = tf.reshape(x_windows, shape=(-1, self.window_size * self.window_size, C))
 
         # Window-based multi-headed self-attention
-        attn_windows = self.attn(x_windows, mask=self.attn_mask)
+        attn_windows1 = self.attn(x_windows, mask=self.attn_mask)
 
         ############# SECOND WINDOWS ATTENTION ###########################
         # Merge windows
-        attn_windows = tf.reshape(attn_windows, shape=(-1, self.window_size, self.window_size, C))
-        shifted_x = window_reverse(attn_windows, self.window_size, H, W, C)
+        attn_windows1 = tf.reshape(attn_windows1, shape=(-1, self.window_size, self.window_size, C))
+        shifted_x = window_reverse(attn_windows1, self.window_size, H, W, C)
         shifted_x = tf.roll(x, shift=[-self.shift_size, -self.shift_size], axis=[1, 2])
         # Window partition 
         x_windows = window_partition(shifted_x, self.window_size)
         x_windows = tf.reshape(x_windows, shape=(-1, self.window_size * self.window_size, C))
 
         # Window-based multi-headed self-attention
-        attn_windows = self.attn(x_windows, mask=self.attn_mask)
+        attn_windows2 = self.attn(x_windows, mask=self.attn_mask)
         ############# END WINDOWS PARTITION ###########################
 
-        # attn_windows = self.get_enhanced_image(x_windows, attn_windows)
+        attn_windows = tf.keras.layers.concatenate([attn_windows1, attn_windows2], axis=-1, name='concat')
+        attn_windows = self.get_enhanced_image(x_windows, attn_windows)
         # print(attn_windows.shape)
         # Epoch 1/3
         # (8192, 16, 128)
